@@ -42,7 +42,10 @@ function Invoke-AsCurrentUser {
         Write-Error -Message "Not able to find Microsoft PowerShell v7 (pwsh.exe). Ensure that it is installed on this system"
         return
     }
-    $privs = whoami /priv /fo csv | ConvertFrom-Csv | Where-Object { $_.'Privilege Name' -eq 'SeDelegateSessionUserImpersonatePrivilege' }
+    $privs = whoami /priv /fo csv | ConvertFrom-Csv
+    $prop = $privs[0].PSObject.Properties.Name[0];
+    $privs = $privs | Where-Object { $_.$prop -eq 'SeDelegateSessionUserImpersonatePrivilege' }
+   
     if (!$privs -or $privs.State -eq "Disabled") {
         Write-Error -Message "Not running with correct privilege. You must run this script as system or have the SeDelegateSessionUserImpersonatePrivilege token."
         return
